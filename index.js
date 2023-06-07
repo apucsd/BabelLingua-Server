@@ -31,11 +31,17 @@ async function run() {
     // user routes post
     app.post("/users", async (req, res) => {
       const user = req.body;
-      const savedUser = { email: user.email };
+
+      const savedUser = await userCollection.findOne({ email: user.email });
+
       if (savedUser) {
         return res.send({ message: "User Already in database" });
       }
       const result = await userCollection.insertOne(user);
+      res.send(result);
+    });
+    app.get("/users", async (req, res) => {
+      const result = await userCollection.find().toArray();
       res.send(result);
     });
     // Send a ping to confirm a successful connection
