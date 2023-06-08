@@ -55,6 +55,49 @@ async function run() {
       const result = await classCollection.insertOne(instructorClass);
       res.send(result);
     });
+    app.get("/classes", verifyJwt, async (req, res) => {
+      const result = await classCollection.find().toArray();
+      res.send(result);
+    });
+    // patch for update status to approve
+    app.patch("/classes/:id", verifyJwt, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: "approved",
+        },
+      };
+
+      const result = await classCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+    app.patch("/classes/deny/:id", verifyJwt, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: "denied",
+        },
+      };
+
+      const result = await classCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+    app.patch("/classes/feedback/:id", verifyJwt, async (req, res) => {
+      const id = req.params.id;
+      const feedback = req.body.feedback;
+
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          feedback: feedback,
+        },
+      };
+
+      const result = await classCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
     app.get("/classes/:email", verifyJwt, async (req, res) => {
       const email = req.params.email;
       const query = { instructorEmail: email };
