@@ -55,6 +55,11 @@ async function run() {
       const result = await classCollection.insertOne(instructorClass);
       res.send(result);
     });
+    app.get("/classes/approved", async (req, res) => {
+      const query = { status: "approved" };
+      const result = await classCollection.find(query).toArray();
+      res.send(result);
+    });
     app.get("/classes", verifyJwt, async (req, res) => {
       const result = await classCollection.find().toArray();
       res.send(result);
