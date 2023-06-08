@@ -1,9 +1,10 @@
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
 require("dotenv").config();
 var jwt = require("jsonwebtoken");
 const cors = require("cors");
 const app = express();
+
 const port = process.env.PORT || 5000;
 
 // middleware
@@ -36,6 +37,7 @@ const verifyJwt = (req, res, next) => {
         .send({ error: true, message: "Unauthorized access" });
     }
     req.decoded = decoded;
+    console.log(decoded);
 
     next();
   });
@@ -64,9 +66,43 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/user/userRole/:email", verifyJwt, async (req, res) => {
+      const email = req.params.email;
+
+      const result = await userCollection.findOne({ email: email });
+      res.send(result);
+    });
+    app.patch("/users/admin/:id", async (req, res) => {
+      const id = req.params.id;
+
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          role: "admin",
+        },
+      };
+
+      const result = await userCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+    app.patch("/users/instructor/:id", async (req, res) => {
+      const id = req.params.id;
+
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          role: "instructor",
+        },
+      };
+
+      const result = await userCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
     // jwt route
-    app.post("/jwt", async (req, res) => {
+    app.post("/jwt", (req, res) => {
       const user = req.body;
+      console.log("from", user);
       const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
         expiresIn: "1h",
       });
