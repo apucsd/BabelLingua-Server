@@ -37,7 +37,6 @@ const verifyJwt = (req, res, next) => {
         .send({ error: true, message: "Unauthorized access" });
     }
     req.decoded = decoded;
-    console.log(decoded);
 
     next();
   });
@@ -48,8 +47,17 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     const userCollection = client.db("babelLinguaDB").collection("users");
+    const classCollection = client.db("babelLinguaDB").collection("classes");
+    //=============== classes routes her===============
 
-    // user routes post
+    app.post("/classes", async (req, res) => {
+      const instructorClass = req.body;
+      const result = await classCollection.insertOne(instructorClass);
+      res.send(result);
+    });
+
+    // ==========================
+    // ===================user routes post
     app.post("/users", async (req, res) => {
       const user = req.body;
 
@@ -72,7 +80,7 @@ async function run() {
       const result = await userCollection.findOne({ email: email });
       res.send(result);
     });
-    app.patch("/users/admin/:id", async (req, res) => {
+    app.patch("/users/admin/:id", verifyJwt, async (req, res) => {
       const id = req.params.id;
 
       const filter = { _id: new ObjectId(id) };
@@ -85,7 +93,7 @@ async function run() {
       const result = await userCollection.updateOne(filter, updateDoc);
       res.send(result);
     });
-    app.patch("/users/instructor/:id", async (req, res) => {
+    app.patch("/users/instructor/:id", verifyJwt, async (req, res) => {
       const id = req.params.id;
 
       const filter = { _id: new ObjectId(id) };
@@ -99,10 +107,9 @@ async function run() {
       res.send(result);
     });
 
-    // jwt route
+    //====================================== jwt route
     app.post("/jwt", (req, res) => {
       const user = req.body;
-      console.log("from", user);
       const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
         expiresIn: "1h",
       });
