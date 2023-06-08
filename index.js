@@ -55,6 +55,13 @@ async function run() {
       const result = await classCollection.insertOne(instructorClass);
       res.send(result);
     });
+    app.get("/classes/:email", verifyJwt, async (req, res) => {
+      const email = req.params.email;
+      const query = { instructorEmail: email };
+
+      const result = await classCollection.find(query).toArray();
+      res.send(result);
+    });
 
     // ==========================
     // ===================user routes post
