@@ -56,6 +56,21 @@ async function run() {
       const result = await bookingCollection.insertOne(bookClass);
       res.send(result);
     });
+    app.get("/bookings/:email", verifyJwt, async (req, res) => {
+      const email = req.params.email;
+      const result = await bookingCollection.find({ email: email }).toArray();
+
+      res.send(result);
+    });
+    app.delete("/bookings/:id", verifyJwt, async (req, res) => {
+      const id = req.params.id;
+
+      const result = await bookingCollection.deleteOne({
+        _id: new ObjectId(id),
+      });
+
+      res.send(result);
+    });
     //=============== classes routes here===============
 
     app.post("/classes", async (req, res) => {
