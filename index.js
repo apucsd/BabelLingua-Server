@@ -2,6 +2,8 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
 require("dotenv").config();
 var jwt = require("jsonwebtoken");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
 const cors = require("cors");
 const app = express();
 
@@ -151,7 +153,7 @@ async function run() {
       const result = await userCollection.find().toArray();
       res.send(result);
     });
-    app.get("/users/instructors", verifyJwt, async (req, res) => {
+    app.get("/users/instructors", async (req, res) => {
       const result = await userCollection
         .find({ role: "instructor" })
         .toArray();
@@ -199,6 +201,24 @@ async function run() {
       });
 
       res.send({ token });
+    });
+
+    // payment intend
+    app.post("/create-payment-intent", async (req, res) => {
+      const { amount } = req.body;
+
+      // Create a PaymentIntent with the order amount and currency
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: parseInt(amount * 100),
+        currency: "usd",
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      });
+
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
     });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
