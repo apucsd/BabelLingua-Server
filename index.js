@@ -48,7 +48,15 @@ async function run() {
     await client.connect();
     const userCollection = client.db("babelLinguaDB").collection("users");
     const classCollection = client.db("babelLinguaDB").collection("classes");
-    //=============== classes routes her===============
+    const bookingCollection = client.db("babelLinguaDB").collection("bookings");
+
+    // =============bookings route=============
+    app.post("/bookings", verifyJwt, async (req, res) => {
+      const bookClass = req.body.booking;
+      const result = await bookingCollection.insertOne(bookClass);
+      res.send(result);
+    });
+    //=============== classes routes here===============
 
     app.post("/classes", async (req, res) => {
       const instructorClass = req.body;
