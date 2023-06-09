@@ -151,6 +151,12 @@ async function run() {
       const result = await userCollection.find().toArray();
       res.send(result);
     });
+    app.get("/users/instructors", verifyJwt, async (req, res) => {
+      const result = await userCollection
+        .find({ role: "instructor" })
+        .toArray();
+      res.send(result);
+    });
 
     app.get("/user/userRole/:email", verifyJwt, async (req, res) => {
       const email = req.params.email;
