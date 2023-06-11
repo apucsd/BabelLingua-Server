@@ -35,7 +35,7 @@ const verifyJwt = (req, res, next) => {
   jwt.verify(token, process.env.ACCESS_TOKEN, (error, decoded) => {
     if (error) {
       return res
-        .status(401)
+        .status(403)
         .send({ error: true, message: "Unauthorized access" });
     }
     req.decoded = decoded;
@@ -53,12 +53,23 @@ async function run() {
     const bookingCollection = client.db("babelLinguaDB").collection("bookings");
     const paymentCollection = client.db("babelLinguaDB").collection("payments");
 
+    //
+    const verifyAdmin = async (req, res, next) => {
+      const { email } = req.decoded;
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      if (user?.role !== "admin") {
+        return res
+          .status(403)
+          .send({ error: true, message: "Only for admins" });
+      }
+      next();
+    };
     // =================payments ===========
 
     app.post("/payments/:id", async (req, res) => {
       const classItem = req.body;
       const id = req.params.id;
-      console.log(classItem.classItem._id);
       const bookId = classItem.classItem._id;
       const deleteBook = await bookingCollection.deleteOne({
         _id: new ObjectId(bookId),
@@ -183,7 +194,7 @@ async function run() {
       const result = await userCollection.insertOne(user);
       res.send(result);
     });
-    app.get("/users", verifyJwt, async (req, res) => {
+    app.get("/users", verifyJwt, verifyAdmin, async (req, res) => {
       const result = await userCollection.find().toArray();
       res.send(result);
     });
@@ -194,10 +205,11 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/user/userRole/:email", verifyJwt, async (req, res) => {
+    app.get("/user/userRole/:email", async (req, res) => {
       const email = req.params.email;
 
       const result = await userCollection.findOne({ email: email });
+
       res.send(result);
     });
     app.patch("/users/admin/:id", verifyJwt, async (req, res) => {
@@ -229,11 +241,12 @@ async function run() {
 
     //====================================== jwt route
     app.post("/jwt", (req, res) => {
-      const user = req.body;
-      const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
+      console.log(req.body);
+      const { email } = req.body;
+
+      const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, {
         expiresIn: "1h",
       });
-
       res.send({ token });
     });
 
