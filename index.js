@@ -114,6 +114,15 @@ async function run() {
       const result = await classCollection.find().toArray();
       res.send(result);
     });
+
+    app.get("/classes/popular", async (req, res) => {
+      const result = await classCollection
+        .find()
+        .sort({ enrolled: -1 })
+        .toArray();
+
+      res.send(result);
+    });
     // patch for update status to approve
     app.patch("/classes/:id", verifyJwt, async (req, res) => {
       const id = req.params.id;
