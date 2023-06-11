@@ -70,6 +70,13 @@ async function run() {
       const result = await paymentCollection.insertOne(classItem);
       res.send(result);
     });
+
+    app.get("/payments/:email", async (req, res) => {
+      const email = req.params.email;
+
+      const result = await paymentCollection.find({ email: email }).toArray();
+      res.send(result);
+    });
     // =============bookings route=============
     app.post("/bookings", verifyJwt, async (req, res) => {
       const bookClass = req.body.booking;
