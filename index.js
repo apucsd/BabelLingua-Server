@@ -51,7 +51,25 @@ async function run() {
     const userCollection = client.db("babelLinguaDB").collection("users");
     const classCollection = client.db("babelLinguaDB").collection("classes");
     const bookingCollection = client.db("babelLinguaDB").collection("bookings");
+    const paymentCollection = client.db("babelLinguaDB").collection("payments");
 
+    // =================payments ===========
+
+    app.post("/payments/:id", async (req, res) => {
+      const classItem = req.body;
+      const id = req.params.id;
+      console.log(classItem.classItem._id);
+      const bookId = classItem.classItem._id;
+      const deleteBook = await bookingCollection.deleteOne({
+        _id: new ObjectId(bookId),
+      });
+      const filter = { _id: new ObjectId(id) };
+      const update = { $inc: { enrolled: 1, availableSeats: -1 } };
+      const updateClass = await classCollection.updateOne(filter, update);
+
+      const result = await paymentCollection.insertOne(classItem);
+      res.send(result);
+    });
     // =============bookings route=============
     app.post("/bookings", verifyJwt, async (req, res) => {
       const bookClass = req.body.booking;
