@@ -82,7 +82,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/payments/:email", async (req, res) => {
+    app.get("/payments/:email", verifyJwt, async (req, res) => {
       const email = req.params.email;
 
       const result = await paymentCollection.find({ email: email }).toArray();
@@ -111,7 +111,7 @@ async function run() {
     });
     //=============== classes routes here===============
 
-    app.post("/classes", async (req, res) => {
+    app.post("/classes", verifyJwt, async (req, res) => {
       const instructorClass = req.body;
       const result = await classCollection.insertOne(instructorClass);
       res.send(result);
@@ -121,7 +121,7 @@ async function run() {
       const result = await classCollection.find(query).toArray();
       res.send(result);
     });
-    app.get("/classes", verifyJwt, async (req, res) => {
+    app.get("/classes", async (req, res) => {
       const result = await classCollection.find().toArray();
       res.send(result);
     });
