@@ -66,7 +66,9 @@ async function run() {
       next();
     };
     // =================payments ===========
-
+    app.get("/test", async (req, res) => {
+      res.send("OK bro");
+    });
     app.post("/payments/:id", async (req, res) => {
       const classItem = req.body;
       const id = req.params.id;
