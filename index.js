@@ -47,7 +47,7 @@ const verifyJwt = (req, res, next) => {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    client.connect();
     const userCollection = client.db("babelLinguaDB").collection("users");
     const classCollection = client.db("babelLinguaDB").collection("classes");
     const bookingCollection = client.db("babelLinguaDB").collection("bookings");
@@ -66,9 +66,7 @@ async function run() {
       next();
     };
     // =================payments ===========
-    app.get("/test", async (req, res) => {
-      res.send("OK bro");
-    });
+
     app.post("/payments/:id", async (req, res) => {
       const classItem = req.body;
       const id = req.params.id;
