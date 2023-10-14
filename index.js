@@ -204,6 +204,11 @@ async function run() {
         .toArray();
       res.send(result);
     });
+    app.get("/users/instructors/:id", async (req, res) => {
+      const id = req.params.id;
+      const result = await userCollection.findOne({ _id: new ObjectId(id) });
+      res.send(result);
+    });
 
     app.get("/user/userRole/:email", async (req, res) => {
       const email = req.params.email;
